@@ -23,7 +23,6 @@ const verificationStore: Map<string, { otp: string; expiresAt: number; attempts:
 export interface SendOtpResult {
   success: boolean;
   message: string;
-  devCode?: string; // Provided for test suite verification
   cooldownSeconds?: number;
 }
 
@@ -87,10 +86,10 @@ export async function sendEmailOtp(email: string): Promise<SendOtpResult> {
     };
   }
 
+  // Local fallback: OTP is stored server-side only — NEVER exposed in the response message
   return {
     success: true,
-    message: `Verification code: ${generatedCode}`,
-    devCode: generatedCode,
+    message: "Verification code sent. Please check your email inbox (or spam folder).",
     cooldownSeconds: 45,
   };
 }
@@ -158,7 +157,7 @@ export async function verifyEmailOtp(email: string, otp: string): Promise<Verify
     };
   }
 
-  if (record.otp !== cleanOtp && cleanOtp !== "123456") {
+  if (record.otp !== cleanOtp) {
     record.attempts += 1;
     if (record.attempts >= 5) {
       verificationStore.delete(normalized);
