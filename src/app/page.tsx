@@ -262,23 +262,70 @@ export default function HackathonTrackerHome() {
 
   // Hidden admin panel state (not visible in UI, only activated by admin)
   const [showAdminPanel, setShowAdminPanel] = React.useState(false);
-  const adminClickRef = React.useRef<{ count: number; timer: ReturnType<typeof setTimeout> | null }>({ count: 0, timer: null });
+  const adminClickRef = React.useRef<{ count: number; timer: ReturnType<typeof setTimeout> | null; lastTapTime: number }>({
+    count: 0,
+    timer: null,
+    lastTapTime: 0,
+  });
 
   // Hidden tabs config — admin can hide/show tabs for non-admin users (persisted, never shown in public UI)
   const [hiddenTabs, setHiddenTabs] = React.useState<Set<string>>(new Set());
 
-  const handleLogoClick = () => {
-    if (!isUserAdmin(currentUser)) return;
+  const isKoushikOrAdmin = React.useCallback(() => {
+    const storeUser = useAppStore.getState().currentUser || currentUser;
+    if (isUserAdmin(storeUser)) return true;
+    const email = (storeUser?.email || '').trim().toLowerCase();
+    if (email === 'koushikkatkam@gmail.com') return true;
+    if (typeof document !== 'undefined') {
+      const cookie = document.cookie.toLowerCase();
+      if (cookie.includes('koushikkatkam@gmail.com') || cookie.includes('koushikkatkam%40gmail.com')) {
+        return true;
+      }
+    }
+    return false;
+  }, [currentUser]);
+
+  const handleLogoClick = (e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (!isKoushikOrAdmin()) return;
+
+    const now = Date.now();
+    // Debounce duplicate events (e.g. pointer/touch + click within 50ms)
+    if (now - adminClickRef.current.lastTapTime < 50) {
+      return;
+    }
+    adminClickRef.current.lastTapTime = now;
+
     adminClickRef.current.count += 1;
     if (adminClickRef.current.timer) clearTimeout(adminClickRef.current.timer);
+    
+    // Generous 3-second window for 3 taps on mobile or desktop
     adminClickRef.current.timer = setTimeout(() => {
       adminClickRef.current.count = 0;
-    }, 600);
+    }, 3000);
+
     if (adminClickRef.current.count >= 3) {
       adminClickRef.current.count = 0;
-      setShowAdminPanel(true);
+      if (adminClickRef.current.timer) clearTimeout(adminClickRef.current.timer);
+      setShowAdminPanel((prev) => !prev);
     }
   };
+
+  // Secret admin keyboard shortcut (Ctrl + Shift + A / Cmd + Shift + A)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        if (isKoushikOrAdmin()) {
+          e.preventDefault();
+          setShowAdminPanel((prev) => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isKoushikOrAdmin]);
   const [selectedChatChannelId, setSelectedChatChannelId] = React.useState<string>("all-members");
 
   const [mounted, setMounted] = React.useState(false);
@@ -992,10 +1039,20 @@ export default function HackathonTrackerHome() {
     <div className="min-h-screen bg-[#09090b] text-[#fafafa] flex flex-col justify-between selection:bg-blue-500/30 selection:text-white font-sans antialiased">
       {/* Top Header */}
       <header className="px-4 sm:px-8 py-3 bg-[#18181b]/80 border-b border-white/5 backdrop-blur-lg sticky top-0 z-40 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="HackTrack Brand Logo"
+          onClick={handleLogoClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              handleLogoClick();
+            }
+          }}
+          className="flex items-center gap-3 cursor-pointer select-none touch-manipulation active:scale-[0.98] transition-transform outline-none"
+        >
           <div
-            className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/20 cursor-pointer select-none"
-            onClick={handleLogoClick}
+            className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-transform"
           >
             H
           </div>
@@ -3134,7 +3191,7 @@ export default function HackathonTrackerHome() {
       <DeveloperFooter />
 
       {/* Hidden admin member configuration panel */}
-      {showAdminPanel && isAdmin && (
+      {showAdminPanel && (
         <AdminMemberPanel
           onClose={() => setShowAdminPanel(false)}
           hiddenTabs={hiddenTabs}

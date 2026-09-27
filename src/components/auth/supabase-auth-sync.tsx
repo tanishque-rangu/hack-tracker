@@ -6,7 +6,7 @@ import { useAppStore } from '@/lib/store/use-app-store';
 import { getAllowedUserConfig, isEmailAuthorized } from '@/lib/auth/allowed-users';
 
 export function SupabaseAuthSync() {
-  const { users, switchUser, addUser, logout } = useAppStore();
+  const { users, switchUser, addUser, updateUser, logout } = useAppStore();
 
   React.useEffect(() => {
     // Purge legacy storage keys from earlier mock/test iterations
@@ -48,6 +48,12 @@ export function SupabaseAuthSync() {
         const config = getAllowedUserConfig(email);
         const existing = users.find((u) => u.email.toLowerCase() === email);
         if (existing) {
+          if (config && (existing.role !== config.role || existing.footer_visible !== config.footer_visible)) {
+            updateUser(existing.id, {
+              role: config.role,
+              footer_visible: config.footer_visible,
+            });
+          }
           switchUser(existing.id);
         } else {
           const added = addUser({
@@ -96,6 +102,12 @@ export function SupabaseAuthSync() {
         const config = getAllowedUserConfig(email);
         const existing = users.find((u) => u.email.toLowerCase() === email);
         if (existing) {
+          if (config && (existing.role !== config.role || existing.footer_visible !== config.footer_visible)) {
+            updateUser(existing.id, {
+              role: config.role,
+              footer_visible: config.footer_visible,
+            });
+          }
           switchUser(existing.id);
         } else {
           const added = addUser({
@@ -115,7 +127,7 @@ export function SupabaseAuthSync() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [users, switchUser, addUser, logout]);
+  }, [users, switchUser, addUser, updateUser, logout]);
 
   return null;
 }

@@ -87,7 +87,7 @@ export function AdminMemberPanel({
   const sortedUsers = [...users].sort((a, b) => {
     if (a.id === currentUser?.id) return 1;
     if (b.id === currentUser?.id) return -1;
-    return a.full_name.localeCompare(b.full_name);
+    return (a.full_name || "").localeCompare(b.full_name || "");
   });
 
   const tabDescriptions: Record<string, string> = {
