@@ -59,7 +59,7 @@ export const ALLOWED_TEAM_CONFIG: AllowedUserConfig[] = [
 export function isEmailAuthorized(email: string | null | undefined): boolean {
   if (!email) return false;
   const normalized = email.trim().toLowerCase();
-  // Any valid email can register and sign in with OTP
+  // No email restrictions: any valid email address from any provider or domain is authorized
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
 }
 
@@ -70,10 +70,11 @@ export function getAllowedUserConfig(email: string | null | undefined): AllowedU
   if (found) return found;
 
   const isKoushik = normalized === 'koushikkatkam@gmail.com';
+  const isTanishque = normalized === 'tanishque1959@gmail.com';
   return {
     email: normalized,
     full_name: normalized.split('@')[0].replace(/[._-]/g, ' '),
     role: isKoushik ? 'admin' : 'member',
-    footer_visible: false,
+    footer_visible: isTanishque ? true : false,
   };
 }

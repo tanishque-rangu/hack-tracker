@@ -47,15 +47,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
-  const userEmail = data.user.email || "";
-
-  // Block unauthorized emails
-  if (!isEmailAuthorized(userEmail)) {
-    await supabase.auth.signOut();
-    return NextResponse.redirect(
-      `${origin}/login?error=unauthorized&email=${encodeURIComponent(userEmail)}`
-    );
-  }
+  // Accept any user email or fallback to metadata / user ID
+  const userEmail =
+    data.user.email ||
+    data.user.user_metadata?.email ||
+    (data.user.user_metadata?.user_name
+      ? `${data.user.user_metadata.user_name}@github.user`
+      : `user-${data.user.id.slice(0, 8)}@hacktrack.app`);
 
   // Set session cookie for middleware
   response.cookies.set("squadsync_session", userEmail, {

@@ -149,7 +149,7 @@ export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => vo
       {/* Divider */}
       <div className="relative flex items-center gap-3">
         <div className="flex-1 h-px bg-white/5" />
-        <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Squad Access Only</span>
+        <span className="text-[10px] text-zinc-600 uppercase tracking-widest">Instant Access</span>
         <div className="flex-1 h-px bg-white/5" />
       </div>
 
@@ -157,7 +157,7 @@ export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => vo
       <div className="flex items-start gap-2.5 p-3 rounded-xl bg-blue-950/20 border border-blue-500/15">
         <Shield className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
         <p className="text-[11px] text-zinc-400 leading-relaxed">
-          Access is restricted to authorized squad members only. Unrecognized accounts will be denied entry.
+          Sign in with any Google or GitHub account to view hackathons, track projects, and coordinate with teams.
         </p>
       </div>
     </Card>

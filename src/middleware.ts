@@ -31,12 +31,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Verify that the email is an authorized team member
-  if (!isEmailAuthorized(authUserEmail)) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('error', 'unauthorized');
-    return NextResponse.redirect(loginUrl);
-  }
+
 
   // For /admin route, ensure user has admin role
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {

@@ -23,31 +23,35 @@ export function SupabaseAuthSync() {
 
     // 1. Check initial real Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email) {
-        const email = session.user.email.toLowerCase();
-        if (isEmailAuthorized(email)) {
-          const metaName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
-          const config = getAllowedUserConfig(email);
-          const existing = users.find((u) => u.email.toLowerCase() === email);
-          if (existing) {
-            switchUser(existing.id);
-          } else if (config) {
-            const added = addUser({
-              full_name: config.full_name || metaName || email.split("@")[0],
-              email: config.email,
-              role: config.role,
-              footer_visible: config.footer_visible,
-            });
-            switchUser(added.id);
-          }
-          // Set session cookie for middleware route protection
-          document.cookie = `squadsync_session=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
-          return;
+      const user = session?.user;
+      if (user) {
+        const rawEmail =
+          user.email ||
+          user.user_metadata?.email ||
+          (user.user_metadata?.user_name
+            ? `${user.user_metadata.user_name}@github.user`
+            : `user-${user.id.slice(0, 8)}@hacktrack.app`);
+        const email = rawEmail.toLowerCase();
+        const metaName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.user_name;
+        const config = getAllowedUserConfig(email);
+        const existing = users.find((u) => u.email.toLowerCase() === email);
+        if (existing) {
+          switchUser(existing.id);
+        } else {
+          const added = addUser({
+            full_name: config?.full_name || metaName || email.split("@")[0].replace(/[._-]/g, " "),
+            email: email,
+            role: config?.role || "member",
+            footer_visible: config?.footer_visible ?? false,
+          });
+          switchUser(added.id);
         }
+        // Set session cookie for middleware route protection
+        document.cookie = `squadsync_session=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
+        return;
       }
 
-      // No active Supabase session or unauthorized email:
-      // Strictly purge any stale cookies and unauthenticate state.
+      // No active Supabase session
       logout();
     });
 
@@ -55,25 +59,30 @@ export function SupabaseAuthSync() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user?.email) {
-        const email = session.user.email.toLowerCase();
-        if (isEmailAuthorized(email)) {
-          const metaName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
-          const config = getAllowedUserConfig(email);
-          const existing = users.find((u) => u.email.toLowerCase() === email);
-          if (existing) {
-            switchUser(existing.id);
-          } else if (config) {
-            const added = addUser({
-              full_name: config.full_name || metaName || email.split("@")[0],
-              email: config.email,
-              role: config.role,
-              footer_visible: config.footer_visible,
-            });
-            switchUser(added.id);
-          }
-          document.cookie = `squadsync_session=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
+      const user = session?.user;
+      if (event === 'SIGNED_IN' && user) {
+        const rawEmail =
+          user.email ||
+          user.user_metadata?.email ||
+          (user.user_metadata?.user_name
+            ? `${user.user_metadata.user_name}@github.user`
+            : `user-${user.id.slice(0, 8)}@hacktrack.app`);
+        const email = rawEmail.toLowerCase();
+        const metaName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.user_name;
+        const config = getAllowedUserConfig(email);
+        const existing = users.find((u) => u.email.toLowerCase() === email);
+        if (existing) {
+          switchUser(existing.id);
+        } else {
+          const added = addUser({
+            full_name: config?.full_name || metaName || email.split("@")[0].replace(/[._-]/g, " "),
+            email: email,
+            role: config?.role || "member",
+            footer_visible: config?.footer_visible ?? false,
+          });
+          switchUser(added.id);
         }
+        document.cookie = `squadsync_session=${encodeURIComponent(email)}; path=/; max-age=604800; SameSite=Lax`;
       } else if (event === 'SIGNED_OUT' || !session) {
         logout();
       }
