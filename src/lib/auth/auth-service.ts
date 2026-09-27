@@ -23,6 +23,8 @@ const verificationStore: Map<string, { otp: string; expiresAt: number; attempts:
 export interface SendOtpResult {
   success: boolean;
   message: string;
+  /** Only populated in NODE_ENV=test for test-suite verification. Never rendered in UI. */
+  devCode?: string;
   cooldownSeconds?: number;
 }
 
@@ -86,10 +88,12 @@ export async function sendEmailOtp(email: string): Promise<SendOtpResult> {
     };
   }
 
-  // Local fallback: OTP is stored server-side only — NEVER exposed in the response message
+  // Local fallback: OTP is NEVER shown in the UI message.
+  // devCode is only returned in test environments for automated test verification.
   return {
     success: true,
     message: "Verification code sent. Please check your email inbox (or spam folder).",
+    ...(process.env.NODE_ENV === "test" ? { devCode: generatedCode } : {}),
     cooldownSeconds: 45,
   };
 }
