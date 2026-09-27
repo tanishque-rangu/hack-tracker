@@ -56,20 +56,34 @@ export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => vo
       return;
     }
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTarget)}`,
-        scopes: provider === "github" ? "read:user user:email" : undefined,
-      },
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTarget)}`,
+          scopes: provider === "github" ? "read:user user:email" : undefined,
+        },
+      });
 
-    if (error) {
-      console.error("Supabase OAuth error:", error);
-      setError(error.message || `Failed to connect with ${provider}. Please try again.`);
+      if (error) {
+        console.error("Supabase OAuth error:", error);
+        setError(error.message || `Failed to connect with ${provider}. Please try again.`);
+        setLoading(null);
+        return;
+      }
+
+      if (data?.url) {
+        // Direct browser navigation to Google/GitHub authentication portal
+        window.location.assign(data.url);
+      } else {
+        setError("Unable to obtain authorization URL. Please try again.");
+        setLoading(null);
+      }
+    } catch (err: any) {
+      console.error("OAuth dispatch exception:", err);
+      setError(err?.message || `Failed to initiate sign in with ${provider}.`);
       setLoading(null);
     }
-    // On success, browser redirects to OAuth provider — no further action needed here
   };
 
   return (
@@ -97,6 +111,7 @@ export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => vo
       <div className="space-y-3">
         {/* Google */}
         <button
+          type="button"
           id="login-google"
           onClick={() => handleOAuth("google")}
           disabled={!!loading}
@@ -112,6 +127,7 @@ export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => vo
 
         {/* GitHub */}
         <button
+          type="button"
           id="login-github"
           onClick={() => handleOAuth("github")}
           disabled={!!loading}
