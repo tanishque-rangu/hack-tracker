@@ -60,7 +60,7 @@ export const INITIAL_MEMBERS: UserProfile[] = [
     email: "tanishque1959@gmail.com",
     full_name: "Tanishque Rangu",
     role: "member",
-    footer_visible: false,
+    footer_visible: true,
     platform_accounts: {
       unstop: "tanishque_u",
       devpost: "tanishque-dev",

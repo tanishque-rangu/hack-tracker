@@ -22,14 +22,13 @@ function LinkedinIcon({ className }: { className?: string }) {
 }
 
 export function DeveloperFooter() {
-  const { currentUser, isHydrated } = useAppStore();
+  const { currentUser } = useAppStore();
   const [videoError, setVideoError] = React.useState(false);
 
   // Determine visibility using the decoupled authorization helper
   const isVisible = canViewDeveloperFooter(currentUser);
 
-  // If hidden or not hydrated yet, do NOT render the container or load the video asset at all!
-  if (!isHydrated || !isVisible) {
+  if (!isVisible) {
     return null;
   }
 
@@ -55,7 +54,7 @@ export function DeveloperFooter() {
 
   return (
     <footer
-      className="relative w-full overflow-hidden bg-black text-zinc-100 border-t border-amber-500/40 select-none shadow-2xl font-cinzel"
+      className="relative w-full overflow-hidden bg-black text-zinc-100 border-t border-amber-500/40 select-none shadow-2xl font-cinzel min-h-[340px]"
       aria-label="Developer Credits"
     >
       {/* Background Video with boosted visibility (clear motion, not blacked out) */}
@@ -76,8 +75,8 @@ export function DeveloperFooter() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25 pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/15 via-transparent to-transparent pointer-events-none" />
 
-      {/* Content Container */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 pb-28 md:pb-16 flex flex-col justify-between space-y-8 z-10 font-cinzel">
+      {/* Content Container with ample mobile bottom spacing to clear mobile fixed bottom nav */}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 pb-36 sm:pb-24 md:pb-16 flex flex-col justify-between space-y-8 z-10 font-cinzel">
         {/* Top row: Administration Header and Royal Proclamation */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 sm:gap-8 pb-8 border-b border-amber-500/25">
           <div className="space-y-3">

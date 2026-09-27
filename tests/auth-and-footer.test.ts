@@ -101,7 +101,7 @@ describe('Developer Footer: Role-Based Visibility', () => {
     email: 'tanishque1959@gmail.com',
     full_name: 'Tanishque Rangu',
     role: 'member',
-    footer_visible: false,
+    footer_visible: true,
   };
 
   const userVarshini: UserProfile = {
@@ -144,8 +144,8 @@ describe('Developer Footer: Role-Based Visibility', () => {
     assert.equal(canViewDeveloperFooter(userShivaram), false);
   });
 
-  it('3. Tanishque cannot see footer (HIDDEN)', () => {
-    assert.equal(canViewDeveloperFooter(userTanishque), false);
+  it('3. Tanishque can see footer (VISIBLE)', () => {
+    assert.equal(canViewDeveloperFooter(userTanishque), true);
   });
 
   it('4. Varshini can see footer (VISIBLE)', () => {
@@ -184,6 +184,6 @@ describe('Developer Footer: Role-Based Visibility', () => {
       full_name: 'Tanishque',
       role: 'member',
     };
-    assert.equal(canViewDeveloperFooter(unannotatedTanishque), false);
+    assert.equal(canViewDeveloperFooter(unannotatedTanishque), true);
   });
 });

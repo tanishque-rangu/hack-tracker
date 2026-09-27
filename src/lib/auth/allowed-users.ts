@@ -28,7 +28,7 @@ export const ALLOWED_TEAM_CONFIG: AllowedUserConfig[] = [
     email: "tanishque1959@gmail.com",
     full_name: "Tanishque Rangu",
     role: "member",
-    footer_visible: false,
+    footer_visible: true,
   },
   {
     email: "varshiniakula6@gmail.com",
