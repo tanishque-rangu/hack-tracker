@@ -2,8 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isEmailAuthorized } from '@/lib/auth/allowed-users';
 
 // Public routes accessible without authentication
-const PUBLIC_PATHS = ['/login', '/signup', '/robots.txt', '/sitemap.xml'];
-const PUBLIC_PREFIXES = ['/_next', '/api/auth', '/favicon.ico', '/ambiance'];
+const PUBLIC_PATHS = ['/login', '/signup', '/auth/callback', '/robots.txt', '/sitemap.xml'];
+const PUBLIC_PREFIXES = ['/_next', '/api/auth', '/auth', '/favicon.ico', '/ambiance'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

@@ -30,7 +30,11 @@ function GitHubIcon() {
 export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => void } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams?.get("redirect") || "/";
+  const rawRedirect = searchParams?.get("redirect") || "/";
+  const redirectTarget =
+    rawRedirect.startsWith("/auth") || rawRedirect.startsWith("/login")
+      ? "/"
+      : rawRedirect;
 
   const [loading, setLoading] = React.useState<"google" | "github" | null>(null);
   const [error, setError] = React.useState<string | null>(() => {
