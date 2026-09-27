@@ -65,7 +65,8 @@ export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => vo
     });
 
     if (error) {
-      setError(error.message);
+      console.error("Supabase OAuth error:", error);
+      setError(error.message || `Failed to connect with ${provider}. Please try again.`);
       setLoading(null);
     }
     // On success, browser redirects to OAuth provider — no further action needed here
@@ -152,14 +153,18 @@ export default function LoginPage() {
         </div>
       }
     >
-      <div className="min-h-screen bg-[#09090b] text-zinc-100 flex items-center justify-center p-4 relative overflow-hidden">
+      <main
+        role="main"
+        id="main-content"
+        className="min-h-screen bg-[#09090b] text-zinc-100 flex items-center justify-center p-4 relative overflow-hidden"
+      >
         {/* Background glow */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-3xl" />
           <div className="absolute top-2/3 left-1/3 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-3xl" />
         </div>
         <OAuthLoginCard />
-      </div>
+      </main>
     </React.Suspense>
   );
 }
