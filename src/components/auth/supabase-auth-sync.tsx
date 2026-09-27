@@ -26,13 +26,14 @@ export function SupabaseAuthSync() {
       if (session?.user?.email) {
         const email = session.user.email.toLowerCase();
         if (isEmailAuthorized(email)) {
+          const metaName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
           const config = getAllowedUserConfig(email);
           const existing = users.find((u) => u.email.toLowerCase() === email);
           if (existing) {
             switchUser(existing.id);
           } else if (config) {
             const added = addUser({
-              full_name: config.full_name,
+              full_name: config.full_name || metaName || email.split("@")[0],
               email: config.email,
               role: config.role,
               footer_visible: config.footer_visible,
@@ -57,13 +58,14 @@ export function SupabaseAuthSync() {
       if (event === 'SIGNED_IN' && session?.user?.email) {
         const email = session.user.email.toLowerCase();
         if (isEmailAuthorized(email)) {
+          const metaName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
           const config = getAllowedUserConfig(email);
           const existing = users.find((u) => u.email.toLowerCase() === email);
           if (existing) {
             switchUser(existing.id);
           } else if (config) {
             const added = addUser({
-              full_name: config.full_name,
+              full_name: config.full_name || metaName || email.split("@")[0],
               email: config.email,
               role: config.role,
               footer_visible: config.footer_visible,

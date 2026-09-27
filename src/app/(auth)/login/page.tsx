@@ -27,7 +27,7 @@ function GitHubIcon() {
   );
 }
 
-export function OAuthLoginCard() {
+export function OAuthLoginCard({ onAuthenticated }: { onAuthenticated?: () => void } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams?.get("redirect") || "/";
@@ -163,3 +163,7 @@ export default function LoginPage() {
     </React.Suspense>
   );
 }
+
+// Backwards compatibility alias
+export const OtpAuthCard = OAuthLoginCard;
+

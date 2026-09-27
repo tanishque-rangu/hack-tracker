@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies();
+  const response = NextResponse.redirect(`${origin}${redirect}`);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
+            response.cookies.set(name, value, options);
           });
         },
       },
@@ -43,7 +45,6 @@ export async function GET(request: NextRequest) {
 
   // Block unauthorized emails
   if (!isEmailAuthorized(userEmail)) {
-    // Sign them out immediately
     await supabase.auth.signOut();
     return NextResponse.redirect(
       `${origin}/login?error=unauthorized&email=${encodeURIComponent(userEmail)}`
@@ -51,7 +52,6 @@ export async function GET(request: NextRequest) {
   }
 
   // Set session cookie for middleware
-  const response = NextResponse.redirect(`${origin}${redirect}`);
   response.cookies.set("squadsync_session", userEmail, {
     path: "/",
     maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -61,3 +61,4 @@ export async function GET(request: NextRequest) {
 
   return response;
 }
+
