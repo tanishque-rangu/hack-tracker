@@ -56,11 +56,15 @@ export const ALLOWED_TEAM_CONFIG: AllowedUserConfig[] = [
   },
 ];
 
+const ALLOWED_EMAILS_SET = new Set(
+  ALLOWED_TEAM_CONFIG.map((u) => u.email.toLowerCase())
+);
+
 export function isEmailAuthorized(email: string | null | undefined): boolean {
   if (!email) return false;
   const normalized = email.trim().toLowerCase();
-  // No email restrictions: any valid email address from any provider or domain is authorized
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+  // STRICT SQUAD RESTRICTION: Only exact authorized team emails may sign in
+  return ALLOWED_EMAILS_SET.has(normalized);
 }
 
 export function getAllowedUserConfig(email: string | null | undefined): AllowedUserConfig | undefined {

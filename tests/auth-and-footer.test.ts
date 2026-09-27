@@ -29,12 +29,15 @@ describe('Auth & Authorization: Email OTP Flow', () => {
     }
   });
 
-  it('2. Invalid emails are strictly rejected', async () => {
+  it('2. Invalid and unauthorized emails are strictly rejected', async () => {
     const invalidEmails = [
       'not-an-email',
       '@missinguser.com',
       'user@missingtld',
       'spaces in email@gmail.com',
+      'stranger@gmail.com',
+      'hacker@yahoo.com',
+      'randomuser@outlook.com',
     ];
 
     for (const email of invalidEmails) {

@@ -31,6 +31,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Strict check: Only authorized squad emails can browse the website
+  if (!isEmailAuthorized(authUserEmail)) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('error', 'unauthorized');
+    loginUrl.searchParams.set('email', authUserEmail);
+    const res = NextResponse.redirect(loginUrl);
+    res.cookies.delete('squadsync_session');
+    return res;
+  }
+
 
 
   // For /admin route, ensure user has admin role

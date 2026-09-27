@@ -47,13 +47,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`);
   }
 
-  // Accept any user email or fallback to metadata / user ID
-  const userEmail =
+  const userEmail = (
     data.user.email ||
     data.user.user_metadata?.email ||
-    (data.user.user_metadata?.user_name
-      ? `${data.user.user_metadata.user_name}@github.user`
-      : `user-${data.user.id.slice(0, 8)}@hacktrack.app`);
+    ""
+  ).toLowerCase();
+
+  // Strict check: Block any unauthorized email immediately
+  if (!userEmail || !isEmailAuthorized(userEmail)) {
+    console.warn(`Unauthorized login attempt blocked: ${userEmail || "anonymous account"}`);
+    await supabase.auth.signOut();
+    const rejectResponse = NextResponse.redirect(
+      `${origin}/login?error=unauthorized&email=${encodeURIComponent(userEmail || "this account")}`
+    );
+    rejectResponse.cookies.delete("squadsync_session");
+    return rejectResponse;
+  }
 
   // Set session cookie for middleware
   response.cookies.set("squadsync_session", userEmail, {

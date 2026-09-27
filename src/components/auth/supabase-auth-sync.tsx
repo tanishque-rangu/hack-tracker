@@ -30,8 +30,20 @@ export function SupabaseAuthSync() {
           user.user_metadata?.email ||
           (user.user_metadata?.user_name
             ? `${user.user_metadata.user_name}@github.user`
-            : `user-${user.id.slice(0, 8)}@hacktrack.app`);
+            : "");
         const email = rawEmail.toLowerCase();
+
+        // STRICT ACCESS RESTRICTION: Block unauthorized emails immediately
+        if (!email || !isEmailAuthorized(email)) {
+          supabase.auth.signOut();
+          logout();
+          document.cookie = "squadsync_session=; path=/; max-age=0";
+          if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+            window.location.href = `/login?error=unauthorized&email=${encodeURIComponent(email || "account")}`;
+          }
+          return;
+        }
+
         const metaName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.user_name;
         const config = getAllowedUserConfig(email);
         const existing = users.find((u) => u.email.toLowerCase() === email);
@@ -66,8 +78,20 @@ export function SupabaseAuthSync() {
           user.user_metadata?.email ||
           (user.user_metadata?.user_name
             ? `${user.user_metadata.user_name}@github.user`
-            : `user-${user.id.slice(0, 8)}@hacktrack.app`);
+            : "");
         const email = rawEmail.toLowerCase();
+
+        // STRICT ACCESS RESTRICTION: Block unauthorized emails immediately
+        if (!email || !isEmailAuthorized(email)) {
+          supabase.auth.signOut();
+          logout();
+          document.cookie = "squadsync_session=; path=/; max-age=0";
+          if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+            window.location.href = `/login?error=unauthorized&email=${encodeURIComponent(email || "account")}`;
+          }
+          return;
+        }
+
         const metaName = user.user_metadata?.full_name || user.user_metadata?.name || user.user_metadata?.user_name;
         const config = getAllowedUserConfig(email);
         const existing = users.find((u) => u.email.toLowerCase() === email);
